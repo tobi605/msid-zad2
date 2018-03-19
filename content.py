@@ -20,7 +20,8 @@ def hamming_distance(X, X_train):
     zbioru zwrocone zostana w postaci macierzy
     :return: macierz odleglosci pomiedzy obiektami z X i X_train N1xN2
     """
-    pass
+    return np.array([[np.count_nonzero(a!=b) for a in X_train.toarray()] for b in X.toarray()])
+    #pass
 
 
 def sort_train_labels_knn(Dist, y):
@@ -38,6 +39,7 @@ def sort_train_labels_knn(Dist, y):
     wartosci podobienstw odpowiadajacego wiersza macierzy
     Dist. Uzyc algorytmu mergesort.
     """
+    
     pass
 
 
