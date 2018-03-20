@@ -39,8 +39,8 @@ def sort_train_labels_knn(Dist, y):
     wartosci podobienstw odpowiadajacego wiersza macierzy
     Dist. Uzyc algorytmu mergesort.
     """
-    
-    pass
+    return(y[Dist.argsort(kind='mergesort')])    
+    #pass
 
 
 def p_y_x_knn(y, k):
@@ -52,7 +52,12 @@ def p_y_x_knn(y, k):
     :param k: liczba najblizszuch sasiadow dla KNN
     :return: macierz prawdopodobienstw dla obiektow z X
     """
-    pass
+    result = np.zeros(shape=(y.shape[0],4))
+    y=np.delete(y,range(k,y.shape[1]), axis=1) #take k closest
+    for i in range(y.shape[0]):
+        result[i] = np.bincount(y[i],minlength=4)
+    return np.divide(result,k)
+    #pass
 
 
 def classification_error(p_y_x, y_true):
@@ -63,7 +68,13 @@ def classification_error(p_y_x, y_true):
     Kazdy wiersz macierzy reprezentuje rozklad p(y|x)
     :return: blad klasyfikacji
     """
-    pass
+    result = 0
+    p_y_x = np.fliplr(p_y_x) #class 3 first, to choose highest first
+    for i in range(y_true.shape[0]):
+        if(np.argmax(p_y_x[i])!=(3-y_true[i])): #3-true because we flipped the matrix
+            result+=1
+    return result/p_y_x.shape[0]
+    #pass
 
 
 def model_selection_knn(Xval, Xtrain, yval, ytrain, k_values):
@@ -76,7 +87,19 @@ def model_selection_knn(Xval, Xtrain, yval, ytrain, k_values):
     :return: funkcja wykonuje selekcje modelu knn i zwraca krotke (best_error,best_k,errors), gdzie best_error to najnizszy
     osiagniety blad, best_k - k dla ktorego blad byl najnizszy, errors - lista wartosci bledow dla kolejnych k z k_values
     """
-    pass
+    labeled = sort_train_labels_knn(hamming_distance(Xval,Xtrain), ytrain)
+    best_k = k_values[0]
+    best_error = classification_error(p_y_x_knn(labeled,k_values[0]), yval)
+    errors = []
+    errors.append(best_error)
+    for i in range(1,len(k_values)):
+        curr_error = classification_error(p_y_x_knn(labeled, k_values[i]), yval)
+        errors.append(curr_error)
+        if(curr_error<best_error):
+            best_error = curr_error
+            best_k = k_values[i]
+    return(best_error, best_k, errors)
+    #pass
 
 
 def estimate_a_priori_nb(ytrain):
@@ -84,7 +107,9 @@ def estimate_a_priori_nb(ytrain):
     :param ytrain: etykiety dla dla danych treningowych 1xN
     :return: funkcja wyznacza rozklad a priori p(y) i zwraca p_y - wektor prawdopodobienstw a priori 1xM
     """
-    pass
+    counts = np.bincount(ytrain)
+    return counts/ytrain.shape[0]
+    #pass
 
 
 def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
@@ -96,7 +121,16 @@ def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
     :return: funkcja wyznacza rozklad prawdopodobienstwa p(x|y) zakladajac, ze x przyjmuje wartosci binarne i ze elementy
     x sa niezalezne od siebie. Funkcja zwraca macierz p_x_y o wymiarach MxD.
     """
-    pass
+    #ogarnac to
+    Xtrain = Xtrain.A
+    pxy = np.zeros(shape=(4,Xtrain.shape[1]))
+    
+    for k in range(4):
+        index = np.nonzero(ytrain==k)[0]
+        count = np.count_nonzero(Xtrain[index,:]==1, axis=0)
+        pxy[k,:] = (count + a - 1) / (index.shape[0] + a + b - 2)
+    #return pxy
+    #pass
 
 
 def p_y_x_nb(p_y, p_x_1_y, X):
