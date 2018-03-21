@@ -123,13 +123,14 @@ def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
     """
     #ogarnac to
     Xtrain = Xtrain.A
-    pxy = np.zeros(shape=(4,Xtrain.shape[1]))
-    
+    pxy = np.empty((4,Xtrain.shape[1]))
+ 
     for k in range(4):
-        index = np.nonzero(ytrain==k)[0]
-        count = np.count_nonzero(Xtrain[index,:]==1, axis=0)
-        pxy[k,:] = (count + a - 1) / (index.shape[0] + a + b - 2)
-    #return pxy
+        d = np.nonzero(ytrain == k)[0]
+        counts = np.count_nonzero(Xtrain[d, :] == 1, axis=0)
+        pxy[k,:] = (counts + a - 1) / (d.shape[0] + a + b - 2)
+    #print(p_x_y)
+    return pxy
     #pass
 
 
@@ -141,7 +142,15 @@ def p_y_x_nb(p_y, p_x_1_y, X):
     :return: funkcja wyznacza rozklad prawdopodobienstwa p(y|x) dla kazdej z klas z wykorzystaniem klasyfikatora Naiwnego
     Bayesa. Funkcja zwraca macierz p_y_x o wymiarach NxM.
     """
-    pass
+    X=X.A
+    pyx = np.zeros(shape=(X.shape[0], 4))
+    
+    for i in range(X.shape[0]):
+        for j in range(4):
+            pyx[i][j] = np.prod( np.power(p_x_1_y, X[i,:]) * np.power((1-p_x_1_y),(1-X[i,:])), axis=1)[j] * p_y[j]
+        pyx[i] /= np.sum(pyx[i])
+    return pyx
+    #pass
 
 
 def model_selection_nb(Xtrain, Xval, ytrain, yval, a_values, b_values):
@@ -157,5 +166,18 @@ def model_selection_nb(Xtrain, Xval, ytrain, yval, a_values, b_values):
     osiagniety blad, best_a - a dla ktorego blad byl najnizszy, best_b - b dla ktorego blad byl najnizszy,
     errors - macierz wartosci bledow dla wszystkich par (a,b)
     """
-    pass
+    error_best = classification_error(p_y_x_nb(estimate_a_priori_nb(ytrain), estimate_p_x_y_nb(Xtrain, ytrain, a_values[0], b_values[0]), Xval), yval)
+    best_a = a_values[0]
+    best_b = b_values[0]
+    errors = np.zeros(shape=(len(a_values),len(b_values)))
+    for i in range(len(a_values)):
+        for j in range(len(b_values)):
+            curr_error = classification_error(p_y_x_nb(estimate_a_priori_nb(ytrain), estimate_p_x_y_nb(Xtrain, ytrain, a_values[i], b_values[j]), Xval), yval)
+            errors[i][j] = curr_error
+            if(curr_error<error_best):
+                error_best = curr_error
+                best_a = a_values[i]
+                best_b = b_values[j]
+    return(error_best, best_a, best_b, errors)
+    #pass
 
