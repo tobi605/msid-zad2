@@ -121,7 +121,7 @@ def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
     :return: funkcja wyznacza rozklad prawdopodobienstwa p(x|y) zakladajac, ze x przyjmuje wartosci binarne i ze elementy
     x sa niezalezne od siebie. Funkcja zwraca macierz p_x_y o wymiarach MxD.
     """
-    #ogarnac to
+    
     Xtrain = Xtrain.A
     pxy = np.empty((4,Xtrain.shape[1]))
  
@@ -129,7 +129,6 @@ def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
         d = np.nonzero(ytrain == k)[0]
         counts = np.count_nonzero(Xtrain[d, :] == 1, axis=0)
         pxy[k,:] = (counts + a - 1) / (d.shape[0] + a + b - 2)
-    #print(p_x_y)
     return pxy
     #pass
 
