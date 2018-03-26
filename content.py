@@ -55,7 +55,7 @@ def p_y_x_knn(y, k):
     result = np.zeros(shape=(y.shape[0],4))
     y=np.delete(y,range(k,y.shape[1]), axis=1) #take k closest
     for i in range(y.shape[0]):
-        result[i] = np.bincount(y[i],minlength=4)
+        result[i] = np.bincount(y[i],minlength=4) #minlength = 4 -> 4 classess
     return np.divide(result,k)
     #pass
 
